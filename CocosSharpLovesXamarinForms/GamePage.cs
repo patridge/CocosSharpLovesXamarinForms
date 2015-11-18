@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Xamarin.Forms;
 using CocosSharp;
+using System.Threading.Tasks;
 
 namespace CocosSharpLovesXamarinForms
 {
@@ -32,12 +33,15 @@ namespace CocosSharpLovesXamarinForms
 			Content = mainAbsoluteLayout;
 		}
 
+		Rectangle lastPageBounds;
 		protected override void LayoutChildren (double x, double y, double width, double height)
 		{
 			base.LayoutChildren(x, y, width, height);
 
-			AbsoluteLayout.SetLayoutBounds (listView, new Rectangle (0, 0, width, height / 2));
-			AbsoluteLayout.SetLayoutBounds (gameView, new Rectangle (0, height / 2, width, height / 2));
+			AbsoluteLayout.SetLayoutBounds (listView, new Rectangle (0, 0, width, height));
+			AbsoluteLayout.SetLayoutBounds (gameView, new Rectangle (0, 0, width / 3, height / 7));
+
+			lastPageBounds = new Rectangle (x, y, width, height);
 		}
 
 		protected override void OnDisappearing ()
@@ -55,6 +59,18 @@ namespace CocosSharpLovesXamarinForms
 
 			if (gameView != null)
 				gameView.Paused = false;
+
+			Task.Run (async () => {
+				await Task.Delay (3000);
+				Device.BeginInvokeOnMainThread (async () => {
+					while (true) {
+						await gameView.LayoutTo (new Rectangle (new Point (lastPageBounds.Width - gameView.Width, lastPageBounds.Height - gameView.Height), gameView.Bounds.Size), 2000);
+						await gameView.LayoutTo (new Rectangle (new Point (lastPageBounds.Width - gameView.Width, 0), gameView.Bounds.Size), 2000);
+						await gameView.LayoutTo (new Rectangle (new Point (0, lastPageBounds.Height - gameView.Height), gameView.Bounds.Size), 2000);
+						await gameView.LayoutTo (new Rectangle (new Point (0, 0), gameView.Bounds.Size), 2000);
+					}
+				});
+			});
 		}
 
 		void LoadGame (object sender, EventArgs e)
