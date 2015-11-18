@@ -8,19 +8,36 @@ namespace CocosSharpLovesXamarinForms
 	public class GamePage : ContentPage
 	{
 		CocosSharpView gameView;
+		ListView listView;
+		AbsoluteLayout mainAbsoluteLayout;
 
 		public GamePage ()
 		{
+			listView = new ListView () {
+				ItemsSource = "These are some words I want to display in a list".Split (new[] { ' ' }),
+			};
 			gameView = new CocosSharpView () {
-				HorizontalOptions = LayoutOptions.FillAndExpand,
-				VerticalOptions = LayoutOptions.FillAndExpand,
 				// Set the game world dimensions
 				DesignResolution = new Size (1024, 768),
 				// Set the method to call once the view has been initialised
 				ViewCreated = LoadGame
 			};
+			mainAbsoluteLayout = new AbsoluteLayout () {
+				Children = {
+					listView,
+					gameView,
+				},
+			};
 
-			Content = gameView;
+			Content = mainAbsoluteLayout;
+		}
+
+		protected override void LayoutChildren (double x, double y, double width, double height)
+		{
+			base.LayoutChildren(x, y, width, height);
+
+			AbsoluteLayout.SetLayoutBounds (listView, new Rectangle (0, 0, width, height / 2));
+			AbsoluteLayout.SetLayoutBounds (gameView, new Rectangle (0, height / 2, width, height / 2));
 		}
 
 		protected override void OnDisappearing ()
